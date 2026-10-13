@@ -1,0 +1,185 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VinoPredict · Wine Quality Prediction</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#faf6f3;--card:#fff;--ink:#2a1620;--mut:#7a6670;--line:#eadfe2;--wine:#7b1e3a;--wine2:#b5395c;--gold:#c9a14a;--r:#2f7dd1;--l:#7b1e3a;--e:#2e9d6f;--sh:0 8px 30px rgba(80,20,40,.08)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#150b10;--card:#211219;--ink:#f6ebee;--mut:#b49aa5;--line:#38202b;--wine:#e0577d;--wine2:#f08aa5;--sh:0 8px 30px rgba(0,0,0,.4)}}
+:root[data-theme="dark"]{--bg:#150b10;--card:#211219;--ink:#f6ebee;--mut:#b49aa5;--line:#38202b;--wine:#e0577d;--wine2:#f08aa5;--sh:0 8px 30px rgba(0,0,0,.4)}
+html{scroll-behavior:smooth;scroll-padding-top:70px}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.55}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;display:flex;align-items:center;gap:18px;padding:12px 5vw;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+nav b{font-family:Georgia,serif;font-size:20px;color:var(--wine);margin-right:auto}nav a{color:var(--mut);text-decoration:none;font-size:14px;font-weight:500}nav a:hover{color:var(--wine)}
+nav button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;padding:5px 11px;cursor:pointer}
+.hero{padding:80px 5vw 70px;text-align:center;background:radial-gradient(900px 400px at 50% -10%,color-mix(in srgb,var(--wine2) 30%,transparent),transparent),var(--bg)}
+.hero h1{font-family:Georgia,serif;font-size:clamp(34px,6vw,64px);margin:10px 0;letter-spacing:-1px}
+.hero h1 span{background:linear-gradient(90deg,var(--wine),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{max-width:640px;margin:0 auto 26px;color:var(--mut);font-size:18px}
+.pill{display:inline-block;padding:5px 14px;border-radius:20px;background:var(--card);border:1px solid var(--line);font-size:13px;color:var(--wine);font-weight:600}
+.btn{display:inline-block;padding:13px 28px;border-radius:30px;background:linear-gradient(135deg,var(--wine),var(--wine2));color:#fff;text-decoration:none;font-weight:600;box-shadow:0 10px 24px rgba(123,30,58,.3);transition:.2s}.btn:hover{transform:translateY(-2px)}
+.kpis{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:40px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 24px;box-shadow:var(--sh)}.kpi b{display:block;font-size:26px;font-family:Georgia,serif;color:var(--wine)}.kpi small{color:var(--mut)}
+section{padding:60px 5vw;max-width:1200px;margin:auto}
+h2{font-family:Georgia,serif;font-size:34px;margin:0 0 6px}.sub{color:var(--mut);margin:0 0 28px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:var(--sh)}
+.grid2{display:grid;grid-template-columns:1.2fr 1fr;gap:22px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.grid2e{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:860px){.grid2,.grid3,.grid2e{grid-template-columns:1fr}}
+.tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}.tabs button{padding:8px 18px;border-radius:20px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;font-weight:600}
+.tabs button.on{background:var(--wine);color:#fff;border-color:var(--wine)}
+.sl{margin:11px 0}.sl label{display:flex;justify-content:space-between;font-size:13px;font-weight:600;text-transform:capitalize}.sl label span{color:var(--wine)}
+input[type=range]{width:100%;accent-color:var(--wine)}
+.out{text-align:center;position:sticky;top:80px;align-self:start}
+.score{font-family:Georgia,serif;font-size:76px;line-height:1;color:var(--wine);margin:6px 0}
+.label{display:inline-block;padding:5px 16px;border-radius:20px;font-weight:700;font-size:14px;color:#fff}
+.bar{height:10px;border-radius:6px;background:var(--line);overflow:hidden}.bar i{display:block;height:100%;border-radius:6px;transition:width .4s}
+.row{display:grid;grid-template-columns:130px 1fr 52px;gap:10px;align-items:center;font-size:12.5px;margin:7px 0}.row em{font-style:normal;color:var(--mut);text-align:right}
+.contrib{display:grid;grid-template-columns:120px 1fr 54px;gap:8px;align-items:center;font-size:12px;margin:5px 0;text-align:left}
+.ctr{position:relative;height:10px;background:var(--line);border-radius:5px}.ctr i{position:absolute;top:0;height:100%;border-radius:5px}.ctr:after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--mut)}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line)}th{color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+td.best{color:var(--e);font-weight:700}.wrap{overflow-x:auto}
+.mc h3{margin:0 0 4px;font-size:18px}.mc p{color:var(--mut);font-size:13.5px;margin:0 0 10px}
+.mc .big{font-family:Georgia,serif;font-size:36px}
+canvas{width:100%;height:auto;display:block}
+.vbars{display:flex;align-items:flex-end;gap:12px;height:200px;padding-top:10px}.vbars div{flex:1;text-align:center;font-size:12px;color:var(--mut);display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+.vbars i{display:block;border-radius:8px 8px 0 0;background:linear-gradient(var(--wine2),var(--wine));min-height:3px}
+.leg{display:flex;gap:16px;font-size:13px;margin-top:10px;flex-wrap:wrap}.leg span:before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--c)}
+footer{text-align:center;color:var(--mut);padding:40px 5vw 60px;font-size:13px;border-top:1px solid var(--line)}
+
+.page{display:none}.page.on{display:block;animation:fade .35s}@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+nav .links{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}nav .links a{padding:7px 12px;border-radius:20px;white-space:nowrap}
+nav a.act{background:color-mix(in srgb,var(--wine) 12%,transparent);color:var(--wine)}
+nav .navbtn{background:linear-gradient(135deg,var(--wine),var(--wine2));color:#fff!important;padding:7px 16px;border-radius:20px;font-weight:600}
+#auth{display:flex;align-items:center;gap:10px;font-size:14px;white-space:nowrap}#auth span{color:var(--mut)}
+.feat{display:block;text-decoration:none;color:var(--ink);transition:.2s}.feat:hover{transform:translateY(-4px)}.feat h3{margin:8px 0 4px;color:var(--wine)}.feat p{margin:0;color:var(--mut);font-size:14px}.feat .ic{font-size:30px}
+.authwrap{max-width:440px;margin:0 auto}.authcard{padding:34px}
+.fld{margin:14px 0}.fld label{display:block;font-size:13px;font-weight:600;margin-bottom:5px}
+.fld input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}.fld input:focus{outline:2px solid var(--wine2);border-color:transparent}
+.msg{min-height:20px;font-size:13px;color:#c0392b;margin:6px 0}.msg.ok{color:var(--e)}
+.authcard .btn{width:100%;border:0;cursor:pointer;font-size:16px}.alt{text-align:center;color:var(--mut);font-size:14px;margin-top:16px}.alt a{color:var(--wine);font-weight:600}
+.gate{text-align:center;padding:50px 20px}.gate .ic{font-size:48px}
+[hidden]{display:none!important}
+</style></head><body>
+<nav><b>🍷 VinoPredict</b><div class="links"><a data-p="home" href="#/home">Home</a><a data-p="predict" href="#/predict">Predict</a><a data-p="eda" href="#/eda">EDA</a><a data-p="metrics" href="#/metrics">Metrics</a><a data-p="coefficients" href="#/coefficients">Coefficients</a></div><div id="auth"></div><button id="th" aria-label="Toggle theme">◐</button></nav>
+<div class="page" data-page="home"><header class="hero"><span class="pill">Ridge · Lasso · Elastic Net</span>
+<h1>Predict wine quality from <span>chemistry</span></h1>
+<p>Three regularised linear regression models trained on the WineQT dataset. Adjust the physicochemical properties and get an instant quality score.</p>
+<a class="btn" href="#/predict">Try the predictor</a>
+<div class="kpis" id="kpis"></div></header>
+<section><h2>Explore the project</h2><p class="sub">Each area lives on its own page.</p><div class="grid3" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+<a class="card feat" href="#/predict"><div class="ic">🎯</div><h3>Predictor</h3><p>Slide the chemistry, get a quality score. Login required.</p></a>
+<a class="card feat" href="#/eda"><div class="ic">📊</div><h3>EDA</h3><p>Distributions, correlations and feature statistics.</p></a>
+<a class="card feat" href="#/metrics"><div class="ic">📈</div><h3>Metrics</h3><p>MAE, RMSE and R² for all three models.</p></a>
+<a class="card feat" href="#/coefficients"><div class="ic">⚖️</div><h3>Coefficients</h3><p>How L1 and L2 penalties change the weights.</p></a></div></section></div>
+
+<section class="page" data-page="predict"><h2>Quality Predictor</h2><p class="sub">Inputs are standardised with the training-set scaler, then passed through the selected model.</p>
+<div class="card gate" id="gate"><div class="ic">🔒</div><h3>Please log in to use the predictor</h3><p style="color:var(--mut)">Create a free account or log in to continue.</p><a class="btn" href="#/login">Log in</a> &nbsp; <a class="btn" style="background:var(--card);color:var(--wine);box-shadow:none;border:1px solid var(--line)" href="#/signup">Sign up</a></div>
+<div id="pbody">
+<div class="grid2"><div class="card"><div class="tabs" id="mtabs"></div><div id="sliders"></div><button class="btn" id="reset" style="border:0;cursor:pointer;margin-top:10px">Reset to average wine</button></div>
+<div class="card out"><small style="color:var(--mut)">PREDICTED QUALITY (0–10 scale)</small><div class="score" id="score">–</div><span class="label" id="verdict"></span>
+<p style="color:var(--mut);font-size:13px" id="mnote"></p><div style="margin-top:14px;text-align:left"><b style="font-size:13px">Feature contributions</b><div id="contrib"></div></div></div></div></div></section>
+
+<section class="page" data-page="eda"><h2>Exploratory Data Analysis</h2><p class="sub" id="edasub"></p>
+<div class="grid2e"><div class="card"><h3 style="margin-top:0">Quality distribution</h3><div class="vbars" id="qd"></div><p style="color:var(--mut);font-size:13px">Most wines score 5 or 6 — the classes are imbalanced, so extreme grades are hard to predict.</p></div>
+<div class="card"><h3 style="margin-top:0">Correlation with quality</h3><div id="corr"></div><div class="leg"><span style="--c:var(--e)">Positive</span><span style="--c:var(--wine)">Negative</span></div></div></div>
+<div class="card" style="margin-top:22px"><h3 style="margin-top:0">Feature summary</h3><div class="wrap"><table id="stats"></table></div></div></section>
+
+<section class="page" data-page="metrics"><h2>Model Metrics</h2><p class="sub">Evaluated on a 20% hold-out test set (random_state = 42), hyperparameters tuned by 5-fold CV.</p>
+<div class="grid3" id="mcards"></div>
+<div class="grid2e" style="margin-top:22px"><div class="card"><h3 style="margin-top:0">Comparison</h3><div class="wrap"><table id="mtable"></table></div></div>
+<div class="card"><h3 style="margin-top:0">Actual vs predicted</h3><div class="tabs" id="stabs"></div><canvas id="sc" width="520" height="400"></canvas></div></div></section>
+
+<section class="page" data-page="coefficients"><h2>Coefficient Comparison</h2><p class="sub">Lasso shrinks weak features to exactly zero (feature selection); Ridge keeps all of them with smaller weights.</p>
+<div class="card"><div id="coefs"></div><div class="leg"><span style="--c:var(--r)">Ridge</span><span style="--c:var(--l)">Lasso</span><span style="--c:var(--e)">Elastic Net</span></div></div></section>
+<section class="page" data-page="login"><div class="authwrap"><div class="card authcard"><h2>Welcome back</h2><p class="sub">Log in to use the quality predictor.</p>
+<form id="lf" novalidate><div class="fld"><label for="le">Email</label><input id="le" type="email" autocomplete="email" placeholder="you@example.com"></div>
+<div class="fld"><label for="lp">Password</label><input id="lp" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+<div class="msg" id="lm"></div><button class="btn" type="submit">Log in</button></form>
+<p class="alt">New here? <a href="#/signup">Create an account</a></p></div></div></section>
+<section class="page" data-page="signup"><div class="authwrap"><div class="card authcard"><h2>Create account</h2><p class="sub">Sign up to unlock the predictor.</p>
+<form id="sf" novalidate><div class="fld"><label for="sn">Full name</label><input id="sn" autocomplete="name" placeholder="Your name"></div>
+<div class="fld"><label for="se">Email</label><input id="se" type="email" autocomplete="email" placeholder="you@example.com"></div>
+<div class="fld"><label for="sp">Password</label><input id="sp" type="password" autocomplete="new-password" placeholder="At least 6 characters"></div>
+<div class="fld"><label for="scf">Confirm password</label><input id="scf" type="password" autocomplete="new-password" placeholder="Repeat password"></div>
+<div class="msg" id="sm"></div><button class="btn" type="submit">Sign up</button></form>
+<p class="alt">Already have an account? <a href="#/login">Log in</a></p></div></div></section>
+<footer>Built with HTML, CSS &amp; JavaScript · Models trained in scikit-learn on WineQT (1,143 samples) · Predictions run fully in your browser · Demo accounts are stored only in this browser</footer>
+<script>
+const D={"features":["fixed acidity","volatile acidity","citric acid","residual sugar","chlorides","free sulfur dioxide","total sulfur dioxide","density","pH","sulphates","alcohol"],"mean":[8.258096280087528,0.5310175054704596,0.26579868708971555,2.519091903719912,0.08647592997811815,15.706783369803064,45.838621444201316,0.9966827242888403,3.314234135667396,0.6556455142231947,10.439186725018237],"scale":[1.6954260412031141,0.1789491991770812,0.19487488821079293,1.3050102686115979,0.047410585778165565,10.231880389516336,31.91193171598602,0.0019133479989592095,0.15281284549872448,0.1660549760886934,1.0741877134665552],"models":{"Ridge":{"params":{"alpha":50},"coef":[0.07645021747508651,-0.21985733910368235,-0.03462667834643729,0.00686056154578311,-0.08684849829508273,0.01751216231450134,-0.07451788467839326,-0.06753078592188648,-0.030036323924110705,0.15505961183468742,0.2649516989925761],"intercept":5.6564551422319465,"mae":0.4763680110021434,"rmse":0.6118030835008498,"r2":0.32736535180096094,"actual":[5,6,5,6,6,8,5,5,6,5,7,6,6,6,5,6,5,5,5,6,6,6,5,7,6,5,7,6,5,6,6,6,6,5,6,5,6,7,6,5,7,5,6,5,4,5,6,6,5,6,7,5,6,7,5,7,6,4,6,5,5,6,5,6,6,6,6,5,5,5,6,5,6,6,5,5,5,5,5,6,5,6,5,6,6,6,6,5,6,6,5,5,6,5,5,5,6,7,6,6,7,6,5,6,5,5,6,7,6,7,7,5,5,5,6,5,5,8,6,5,5,5,5,6,5,6,6,6,6,6,5,5,7,6,5,5,5,6,5,6,7,6,6,5,7,5,5,5,5,5],"pred":[5.394,4.871,5.267,5.144,6.063,6.581,5.364,5.133,5.759,5.355,6.307,6.381,5.322,6.192,5.863,4.894,5.706,5.695,5.485,6.346,6.048,6.022,5.186,6.469,5.599,5.121,6.54,5.942,5.135,5.569,6.179,5.465,6.562,5.729,5.56,5.257,5.474,6.033,6.888,6.523,6.406,5.372,6.954,5.365,5.058,5.074,5.62,5.836,4.676,5.685,6.409,5.264,5.605,5.863,5.78,6.365,5.52,5.688,6.023,5.272,5.514,5.932,5.654,6.331,6.152,5.403,6.77,5.282,4.935,5.966,5.755,5.328,5.921,5.929,5.195,5.182,5.91,5.86,5.61,5.449,5.394,5.57,6.044,5.3,5.53,5.988,5.389,5.693,5.73,5.301,4.692,5.575,5.083,5.191,5.054,5.191,5.381,6.581,5.893,5.538,5.746,6.326,5.201,6.071,5.213,5.37,5.878,6.146,5.597,6.508,5.906,5.323,5.499,6.051,5.055,5.082,5.313,6.38,5.76,4.881,5.267,4.963,5.608,6.603,5.166,5.722,5.728,5.761,5.032,6.29,5.166,4.868,5.924,5.693,7.409,4.754,4.285,5.531,5.593,5.762,6.923,5.331,5.668,4.925,6.355,5.192,5.122,5.403,4.92,5.006]},"Lasso":{"params":{"alpha":0.014678},"coef":[0.00030258247943601424,-0.21990957685131313,-0.0,-0.0,-0.07671975237786734,0.0,-0.05956986048644454,-0.0,-0.03434562007222616,0.13207018725753006,0.29685129710722824],"intercept":5.656455142231948,"mae":0.47290247509707006,"rmse":0.6059419709362083,"r2":0.3401913846617236,"actual":[5,6,5,6,6,8,5,5,6,5,7,6,6,6,5,6,5,5,5,6,6,6,5,7,6,5,7,6,5,6,6,6,6,5,6,5,6,7,6,5,7,5,6,5,4,5,6,6,5,6,7,5,6,7,5,7,6,4,6,5,5,6,5,6,6,6,6,5,5,5,6,5,6,6,5,5,5,5,5,6,5,6,5,6,6,6,6,5,6,6,5,5,6,5,5,5,6,7,6,6,7,6,5,6,5,5,6,7,6,7,7,5,5,5,6,5,5,8,6,5,5,5,5,6,5,6,6,6,6,6,5,5,7,6,5,5,5,6,5,6,7,6,6,5,7,5,5,5,5,5],"pred":[5.346,4.93,5.292,5.215,6.095,6.528,5.314,5.196,5.757,5.425,6.351,6.351,5.382,6.174,5.881,4.885,5.72,5.707,5.425,6.343,6.023,6.103,5.181,6.486,5.601,5.137,6.504,5.924,5.089,5.538,6.12,5.475,6.471,5.785,5.617,5.244,5.492,5.983,6.85,6.422,6.346,5.356,6.926,5.252,5.059,5.064,5.643,5.857,4.67,5.708,6.432,5.113,5.606,5.908,5.756,6.309,5.574,5.751,5.925,5.324,5.515,5.925,5.771,6.277,6.184,5.434,6.702,5.278,4.98,5.962,5.651,5.29,5.981,5.988,5.057,5.179,6.028,5.864,5.666,5.489,5.448,5.534,5.967,5.259,5.543,5.977,5.382,5.675,5.731,5.299,4.682,5.609,5.071,5.193,5.099,5.218,5.425,6.434,5.988,5.501,5.718,6.312,5.198,6.013,5.208,5.398,5.892,6.242,5.561,6.475,5.858,5.38,5.518,6.078,5.094,5.14,5.353,6.465,5.716,4.884,5.243,4.977,5.696,6.467,5.157,5.708,5.684,5.75,5.071,6.38,5.19,4.918,6.012,5.744,7.26,4.737,4.303,5.53,5.617,5.764,6.92,5.372,5.606,4.93,6.394,5.257,5.123,5.411,4.919,5.071]},"ElasticNet":{"params":{"alpha":0.05,"l1_ratio":0.1},"coef":[0.053622550700075794,-0.2164345759202022,-0.01742037200473347,0.0,-0.08338399896608913,0.0067143701639777245,-0.06558886336654457,-0.048727885811217016,-0.027479206199438673,0.1468186203765226,0.2711589506057408],"intercept":5.6564551422319465,"mae":0.47606770310322805,"rmse":0.6099248899866687,"r2":0.33148889706286344,"actual":[5,6,5,6,6,8,5,5,6,5,7,6,6,6,5,6,5,5,5,6,6,6,5,7,6,5,7,6,5,6,6,6,6,5,6,5,6,7,6,5,7,5,6,5,4,5,6,6,5,6,7,5,6,7,5,7,6,4,6,5,5,6,5,6,6,6,6,5,5,5,6,5,6,6,5,5,5,5,5,6,5,6,5,6,6,6,6,5,6,6,5,5,6,5,5,5,6,7,6,6,7,6,5,6,5,5,6,7,6,7,7,5,5,5,6,5,5,8,6,5,5,5,5,6,5,6,6,6,6,6,5,5,7,6,5,5,5,6,5,6,7,6,6,5,7,5,5,5,5,5],"pred":[5.385,4.897,5.279,5.179,6.067,6.56,5.349,5.167,5.747,5.386,6.3,6.362,5.328,6.184,5.874,4.9,5.717,5.697,5.466,6.331,6.041,6.02,5.195,6.464,5.595,5.132,6.53,5.941,5.127,5.556,6.159,5.465,6.531,5.745,5.573,5.259,5.475,6.015,6.866,6.477,6.386,5.376,6.932,5.328,5.057,5.073,5.627,5.844,4.689,5.692,6.409,5.211,5.604,5.866,5.766,6.344,5.537,5.698,5.988,5.298,5.512,5.926,5.708,6.314,6.166,5.423,6.735,5.284,4.973,5.963,5.731,5.312,5.947,5.946,5.151,5.177,5.951,5.864,5.635,5.467,5.419,5.557,6.019,5.284,5.534,5.98,5.394,5.684,5.727,5.303,4.706,5.582,5.094,5.197,5.077,5.206,5.401,6.531,5.909,5.522,5.739,6.326,5.196,6.036,5.22,5.391,5.883,6.178,5.582,6.494,5.881,5.348,5.515,6.066,5.08,5.101,5.327,6.399,5.741,4.893,5.259,4.981,5.633,6.556,5.168,5.713,5.706,5.756,4.982,6.311,5.18,4.846,5.952,5.711,7.332,4.765,4.312,5.534,5.606,5.764,6.916,5.349,5.654,4.942,6.352,5.227,5.128,5.409,4.936,5.046]}},"eda":{"qdist":{"3":6,"4":33,"5":483,"6":462,"7":143,"8":16},"corr":{"fixed acidity":0.122,"volatile acidity":-0.407,"citric acid":0.241,"residual sugar":0.022,"chlorides":-0.124,"free sulfur dioxide":-0.063,"total sulfur dioxide":-0.183,"density":-0.175,"pH":-0.052,"sulphates":0.258,"alcohol":0.485},"stats":{"fixed acidity":{"min":4.6,"max":15.9,"mean":8.311111111111112,"median":7.9},"volatile acidity":{"min":0.12,"max":1.58,"mean":0.5313385826771653,"median":0.52},"citric acid":{"min":0.0,"max":1.0,"mean":0.2683639545056868,"median":0.25},"residual sugar":{"min":0.9,"max":15.5,"mean":2.5321522309711284,"median":2.2},"chlorides":{"min":0.012,"max":0.611,"mean":0.08693263342082239,"median":0.079},"free sulfur dioxide":{"min":1.0,"max":68.0,"mean":15.615485564304462,"median":13.0},"total sulfur dioxide":{"min":6.0,"max":289.0,"mean":45.91469816272966,"median":37.0},"density":{"min":0.99007,"max":1.00369,"mean":0.9967304111986001,"median":0.99668},"pH":{"min":2.74,"max":4.01,"mean":3.3110148731408575,"median":3.31},"sulphates":{"min":0.33,"max":2.0,"mean":0.6577077865266842,"median":0.62},"alcohol":{"min":8.4,"max":14.9,"mean":10.442111402741325,"median":10.2}},"n":1143}};
+const F=D.features,M=D.models,names={Ridge:'Ridge',Lasso:'Lasso',ElasticNet:'Elastic Net'},col={Ridge:'var(--r)',Lasso:'var(--l)',ElasticNet:'var(--e)'};
+const $=id=>document.getElementById(id),cap=s=>s[0].toUpperCase()+s.slice(1);
+let cur='Lasso',vals={};
+const desc={Ridge:'L2 penalty shrinks all coefficients smoothly.',Lasso:'L1 penalty zeroes out weak features.',ElasticNet:'Blend of L1 and L2 penalties.'};
+document.getElementById('th').onclick=()=>{const r=document.documentElement,d=r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches);r.dataset.theme=d?'light':'dark';draw()};
+const best=Object.keys(M).reduce((a,b)=>M[a].r2>M[b].r2?a:b);
+$('kpis').innerHTML=[[D.eda.n.toLocaleString(),'wines'],[F.length,'features'],['3','models'],[(M[best].r2).toFixed(3),'best R² ('+names[best]+')']].map(k=>`<div class="kpi"><b>${k[0]}</b><small>${k[1]}</small></div>`).join('');
+$('edasub').textContent=`${D.eda.n} wines · 11 physicochemical features · target: quality score`;
+// predictor
+F.forEach((f,i)=>{vals[f]=D.eda.stats[f].mean});
+$('sliders').innerHTML=F.map(f=>{const s=D.eda.stats[f],st=((s.max-s.min)/200).toPrecision(2);return `<div class="sl"><label>${f}<span id="v_${f.replace(/ /g,'_')}"></span></label><input type="range" id="r_${f.replace(/ /g,'_')}" min="${s.min}" max="${s.max}" step="${st}" value="${s.mean}"></div>`}).join('');
+F.forEach(f=>{const k=f.replace(/ /g,'_');$('r_'+k).oninput=e=>{vals[f]=+e.target.value;predict()}});
+$('reset').onclick=()=>{F.forEach(f=>{vals[f]=D.eda.stats[f].mean;$('r_'+f.replace(/ /g,'_')).value=vals[f]});predict()};
+$('mtabs').innerHTML=Object.keys(M).map(k=>`<button data-k="${k}" class="${k===cur?'on':''}">${names[k]}</button>`).join('');
+$('mtabs').onclick=e=>{if(e.target.dataset.k){cur=e.target.dataset.k;[...$('mtabs').children].forEach(b=>b.classList.toggle('on',b.dataset.k===cur));predict()}};
+function predict(){const m=M[cur];let y=m.intercept;const cs=[];
+ F.forEach((f,i)=>{const z=(vals[f]-D.mean[i])/D.scale[i],c=z*m.coef[i];y+=c;cs.push([f,c]);$('v_'+f.replace(/ /g,'_')).textContent=(+vals[f]).toFixed(f==='density'?4:2)});
+ y=Math.max(0,Math.min(10,y));$('score').textContent=y.toFixed(2);
+ const v=y<5?['Below average','#c0392b']:y<6?['Average','#d98e04']:y<7?['Good','#2e9d6f']:['Excellent','#1f6fb5'];
+ const L=$('verdict');L.textContent=v[0]+' · ≈ grade '+Math.round(y);L.style.background=v[1];
+ $('mnote').textContent=`${names[cur]}: ${desc[cur]}`;
+ const mx=Math.max(...cs.map(c=>Math.abs(c[1])),.01);
+ $('contrib').innerHTML=cs.sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).map(([f,c])=>{const w=Math.abs(c)/mx*50;return `<div class="contrib"><span>${cap(f)}</span><div class="ctr"><i style="width:${w}%;left:${c>=0?50:50-w}%;background:${c>=0?'var(--e)':'var(--wine)'}"></i></div><span style="text-align:right;color:var(--mut)">${c>=0?'+':''}${c.toFixed(2)}</span></div>`}).join('')}
+// EDA
+const q=D.eda.qdist,qm=Math.max(...Object.values(q));
+$('qd').innerHTML=Object.entries(q).map(([k,v])=>`<div><span>${v}</span><i style="height:${v/qm*150}px"></i><b style="color:var(--ink)">${k}</b></div>`).join('');
+const cr=Object.entries(D.eda.corr).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
+$('corr').innerHTML=cr.map(([f,v])=>`<div class="row"><span>${cap(f)}</span><div class="bar"><i style="width:${Math.abs(v)/.5*100}%;background:${v>0?'var(--e)':'var(--wine)'}"></i></div><em>${v>0?'+':''}${v.toFixed(2)}</em></div>`).join('');
+$('stats').innerHTML='<tr><th>Feature</th><th>Min</th><th>Mean</th><th>Median</th><th>Max</th></tr>'+F.map(f=>{const s=D.eda.stats[f];return `<tr><td>${cap(f)}</td><td>${s.min.toFixed(3)}</td><td>${s.mean.toFixed(3)}</td><td>${s.median.toFixed(3)}</td><td>${s.max.toFixed(3)}</td></tr>`}).join('');
+// Metrics
+const bestOf=(k,lowGood)=>{const ks=Object.keys(M);return ks.reduce((a,b)=>(lowGood?M[a][k]<M[b][k]:M[a][k]>M[b][k])?a:b)};
+const bR=bestOf('r2'),bM=bestOf('mae',1),bS=bestOf('rmse',1);
+const hp=m=>Object.entries(m.params).map(([k,v])=>`${k==='l1_ratio'?'l1 ratio':k} = ${v}`).join(', ');
+$('mcards').innerHTML=Object.keys(M).map(k=>{const m=M[k];return `<div class="card mc" style="border-top:4px solid ${col[k]}"><h3>${names[k]}</h3><p>${hp(m)}</p><div class="big" style="color:${col[k]}">${m.r2.toFixed(3)}</div><p>R² score</p><div class="bar"><i style="width:${m.r2*100}%;background:${col[k]}"></i></div><p style="margin-top:12px">MAE <b>${m.mae.toFixed(3)}</b> · RMSE <b>${m.rmse.toFixed(3)}</b></p></div>`}).join('');
+$('mtable').innerHTML='<tr><th>Model</th><th>Best params</th><th>MAE</th><th>RMSE</th><th>R²</th></tr>'+Object.keys(M).map(k=>{const m=M[k];return `<tr><td><b>${names[k]}</b></td><td>${hp(m)}</td><td class="${k===bM?'best':''}">${m.mae.toFixed(4)}</td><td class="${k===bS?'best':''}">${m.rmse.toFixed(4)}</td><td class="${k===bR?'best':''}">${m.r2.toFixed(4)}</td></tr>`}).join('');
+let sk='Lasso';
+$('stabs').innerHTML=Object.keys(M).map(k=>`<button data-k="${k}" class="${k===sk?'on':''}">${names[k]}</button>`).join('');
+$('stabs').onclick=e=>{if(e.target.dataset.k){sk=e.target.dataset.k;[...$('stabs').children].forEach(b=>b.classList.toggle('on',b.dataset.k===sk));draw()}};
+function draw(){const c=$('sc'),x=c.getContext('2d'),W=c.width,H=c.height,p=44,cs=getComputedStyle(document.documentElement);
+ const ink=cs.getPropertyValue('--mut').trim()||'#888',line=cs.getPropertyValue('--line').trim()||'#ddd';
+ const tint=getComputedStyle(document.body).color;
+ x.clearRect(0,0,W,H);const lo=2.5,hi=8.5,sx=v=>p+(v-lo)/(hi-lo)*(W-p-14),sy=v=>H-p-(v-lo)/(hi-lo)*(H-p-14);
+ x.font='12px sans-serif';x.fillStyle=ink;x.strokeStyle=line;x.lineWidth=1;
+ for(let v=3;v<=8;v++){x.beginPath();x.moveTo(sx(v),sy(lo));x.lineTo(sx(v),sy(hi));x.moveTo(sx(lo),sy(v));x.lineTo(sx(hi),sy(v));x.stroke();x.fillText(v,sx(v)-3,H-p+18);x.fillText(v,p-18,sy(v)+4)}
+ x.fillText('Actual quality',W/2-35,H-8);x.save();x.translate(12,H/2+30);x.rotate(-Math.PI/2);x.fillText('Predicted',0,0);x.restore();
+ x.setLineDash([6,5]);x.strokeStyle=ink;x.beginPath();x.moveTo(sx(lo),sy(lo));x.lineTo(sx(hi),sy(hi));x.stroke();x.setLineDash([]);
+ const m=M[sk],cc={Ridge:'#2f7dd1',Lasso:'#b5395c',ElasticNet:'#2e9d6f'}[sk];x.fillStyle=cc+'99';
+ m.actual.forEach((a,i)=>{x.beginPath();x.arc(sx(a+(Math.sin(i*12.9)*.12)),sy(m.pred[i]),4,0,7);x.fill()})}
+// Coefficients
+const cm=Math.max(...Object.values(M).flatMap(m=>m.coef.map(Math.abs)));
+$('coefs').innerHTML=F.map((f,i)=>`<div style="margin:14px 0"><b style="font-size:13px">${cap(f)}</b>`+Object.keys(M).map(k=>{const v=M[k].coef[i],w=Math.abs(v)/cm*50;return `<div class="contrib" style="grid-template-columns:90px 1fr 54px"><span style="color:var(--mut)">${names[k]}</span><div class="ctr"><i style="width:${w}%;left:${v>=0?50:50-w}%;background:${col[k]}"></i></div><span style="text-align:right">${v.toFixed(3)}</span></div>`}).join('')+'</div>').join('');
+predict();draw();
+// ---- auth + routing (demo only: accounts live in this browser's localStorage) ----
+const mem={};const st={get(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){return mem[k]||null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){mem[k]=v}},del(k){try{localStorage.removeItem(k)}catch(e){delete mem[k]}}};
+async function hash(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return btoa(s)}}
+let user=st.get('vp_session');
+function renderAuth(){$('auth').innerHTML=user?`<span>Hi, ${user.name.split(' ')[0].replace(/[<>&]/g,'')}</span><a href="#" id="lo">Log out</a>`:`<a href="#/login">Log in</a><a class="navbtn" href="#/signup">Sign up</a>`;
+ if(user)$('lo').onclick=e=>{e.preventDefault();user=null;st.del('vp_session');renderAuth();location.hash='#/login';route()}}
+const pages=[...document.querySelectorAll('.page')];
+function route(){let p=location.hash.replace('#/','')||(user?'home':'login');if(!pages.some(x=>x.dataset.page===p))p=user?'home':'login';
+ const ap=p==='login'||p==='signup';if(!user&&!ap)p='login';if(user&&ap)p='home';history.replaceState(null,'','#/'+p);
+ document.querySelector('nav .links').hidden=!user;
+ pages.forEach(x=>x.classList.toggle('on',x.dataset.page===p));
+ document.querySelectorAll('nav a[data-p]').forEach(a=>a.classList.toggle('act',a.dataset.p===p));
+ $('gate').hidden=!!user;$('pbody').hidden=!user;
+ document.title='VinoPredict · '+cap(p);scrollTo(0,0);if(p==='metrics')draw()}
+addEventListener('hashchange',route);
+const mailOk=e=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+$('sf').onsubmit=async e=>{e.preventDefault();const m=$('sm'),n=$('sn').value.trim(),em=$('se').value.trim().toLowerCase(),pw=$('sp').value;m.className='msg';
+ if(n.length<2)return m.textContent='Please enter your name.';if(!mailOk(em))return m.textContent='Enter a valid email address.';
+ if(pw.length<6)return m.textContent='Password must be at least 6 characters.';if(pw!==$('scf').value)return m.textContent='Passwords do not match.';
+ const u=st.get('vp_users')||{};if(u[em])return m.textContent='An account with this email already exists.';
+ u[em]={name:n,h:await hash(pw)};st.set('vp_users',u);user={name:n,email:em};st.set('vp_session',user);m.textContent='';e.target.reset();renderAuth();location.hash='#/home';route()};
+$('lf').onsubmit=async e=>{e.preventDefault();const m=$('lm'),em=$('le').value.trim().toLowerCase(),pw=$('lp').value;
+ const u=(st.get('vp_users')||{})[em];if(!u||u.h!==await hash(pw))return m.textContent='Incorrect email or password.';
+ user={name:u.name,email:em};st.set('vp_session',user);m.textContent='';e.target.reset();renderAuth();location.hash='#/home';route()};
+renderAuth();route();
+</script></body></html>
